@@ -22,3 +22,5 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('', include('api.urls'))
 ]
+# if I have 'domain.com/hello" after the slash will be sent to this file which dispatches endpoints
+
