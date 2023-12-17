@@ -8,7 +8,7 @@ import random
 # Rule for Django models: Fat models, Thin views. 
 
 def generate_unique_code():
-    length: 6
+    length = 6
 
     while True:
         #generate a random code of k length using uppercase ascii characters
@@ -23,7 +23,7 @@ class Room(models.Model):
     # define fields for each room. Table attributes with constraints
 
     # unique code that identifies the room
-    code = models.CharField(max_length=8, default="", unique=True)
+    code = models.CharField(max_length=8, default=generate_unique_code, unique=True)
 
     # each room will have a host
     host = models.CharField(max_length=50, unique=True)
