@@ -9,7 +9,7 @@ function Room() {
   const { roomCode } = useParams();
 
   useEffect(() => {
-    getRoomDetails() //call getRO=oom Details when roomCode changes
+    getRoomDetails() //call getRoom Details when roomCode changes
   }, [roomCode]);
 
   // You can define functions within components like so
