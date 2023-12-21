@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 
 
 
-export default function HomePage() {
+export default function HomePage(props) {
 
   const [roomCode, setRoomCode] = useState(null)
 
@@ -47,6 +47,10 @@ export default function HomePage() {
     )
   }
 
+  function clearRoomCode() {
+    setRoomCode(null)
+  }
+
   return (
     <Router>
       <Routes>
@@ -58,7 +62,10 @@ export default function HomePage() {
 
         <Route path="/join" element={<JoinRoomPage />} />
         <Route path="/create" element={<CreateRoomPage />} />
-        <Route path="/room/:roomCode" element={<Room />} />
+        <Route 
+          path="/room/:roomCode" 
+          element={<Room leaveRoomCallback={clearRoomCode}/>}
+        />
       </Routes>
     </Router>
   )
