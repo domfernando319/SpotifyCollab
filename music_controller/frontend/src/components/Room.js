@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {Grid, Button, Typography} from '@material-ui/core';
+import CreateRoomPage from './CreateRoomPage';
 
 function Room(props) {
   const [votesToSkip, setVotesToSkip] = useState(2);
   const [guestCanPause, setGuestCanPause] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [settingsEnabled, setSettingsEnabled] = useState(false);
+
   const navigate = useNavigate();
   const { roomCode } = useParams();
 
@@ -22,11 +25,11 @@ function Room(props) {
           }
           return r.json()
         })
-        // .then((data) => {
-        //     setVotesToSkip(data.votes_to_skip)
-        //     setGuestCanPause(data.guest_can_pause)
-        //     setIsHost(data.is_host)
-        // })
+        .then((data) => {
+            setVotesToSkip(data.votes_to_skip)
+            setGuestCanPause(data.guest_can_pause)
+            setIsHost(data.is_host)
+        })
         // .catch((error) => {
         //     console.error('Error fetching room details:', error)
         // })
@@ -46,42 +49,80 @@ function Room(props) {
       })
   }
 
-  return (
+  // we only want to render button if user is host so logic should go here vs in the JSX
+  function renderSettingsButton() {
+      return (
+        <Grid item xs={12} align='center'>
+          <Button variant="contained" color="primary" onClick={() => {
+            setSettingsEnabled(true)
+            renderSettings()
+          }}>
+            Settings
+          </Button>
+        </Grid>
+      )
+  }
+  
+  function renderSettings() {
+    return (<Grid container spacing ={1}>
+      <Grid item xs={12} align="center">
+        <CreateRoomPage 
+          update={true} 
+          votesToSkip={votesToSkip} 
+          guestCanPause={guestCanPause} 
+          code={roomCode} 
+          updateCallback={() => {
 
-    <Grid container spacing ={1}>
-      <Grid item xs={12} align='center'>
-        <Typography variant="h4" component="h4">
-          Code: {roomCode}
-        </Typography>
+          }}/>
       </Grid>
-      <Grid item xs={12} align='center'>
-        <Typography variant="h6" component="h6">
-          Votes to Skip: {votesToSkip}
-        </Typography>
-      </Grid>
-      <Grid item xs={12} align='center'>
-        <Typography variant="h6" component="h6">
-          Guest can Pause: {guestCanPause ? 'Yes' : 'No'}
-        </Typography>
-      </Grid>
-      <Grid item xs={12} align='center'>
-        <Typography variant="h6" component="h6">
-          Host: {isHost ? 'Yes' : 'No'}
-        </Typography>
-      </Grid>
-      <Grid item xs={12} align='center'>
-        <Button variant="contained" color='secondary' onClick={leaveButtonClick}>
-          Leave Room
+      <Grid item xs={12} align="center">
+        <Button
+        variant="contained"
+        color = "secondary"
+        onClick={() => setSettingsEnabled(false)}>
+          Close Settings
         </Button>
       </Grid>
-    </Grid>
-    // <div>
-    //   <h3>{roomCode}</h3>
-    //   <p>Votes to Skip: {votesToSkip}</p>
-    //   <p>Guest can Pause: {guestCanPause ? 'Yes' : 'No'}</p>
-    //   <p>Host: {isHost ? 'Yes' : 'No'}</p>
-    // </div>
-  );
+    </Grid>)
+  }
+
+  return (
+    settingsEnabled ? (renderSettings()) : 
+    (
+
+      <Grid container spacing ={1}>
+        <Grid item xs={12} align='center'>
+          <Typography variant="h4" component="h4">
+            Code: {roomCode}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} align='center'>
+          <Typography variant="h6" component="h6">
+            Votes to Skip: {votesToSkip}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} align='center'>
+          <Typography variant="h6" component="h6">
+            Guest can Pause: {guestCanPause ? 'Yes' : 'No'}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} align='center'>
+          <Typography variant="h6" component="h6">
+            Host: {isHost ? 'Yes' : 'No'}
+          </Typography>
+        </Grid>
+
+        {/* settings button  */}
+        {isHost ? renderSettingsButton() : null }
+
+        <Grid item xs={12} align='center'>
+          <Button variant="contained" color='secondary' onClick={leaveButtonClick}>
+            Leave Room
+          </Button>
+        </Grid>
+      </Grid>
+    )
+  )
 }
 
 export default Room;
