@@ -11,6 +11,7 @@ import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { Collapse } from '@material-ui/core';
+import { Alert } from "@mui/material";
 
 function CreateRoomPage(props) {
 
@@ -107,7 +108,10 @@ function CreateRoomPage(props) {
     <Grid container spacing={1}>
       <Grid item xs={12} align="center">
         <Collapse in={errMsg != "" || successMsg != ""}>
-          {successMsg}
+          {successMsg != "" ? 
+          (<Alert severity="success" onClose={()=>{setSuccessMsg("")}}>{successMsg}</Alert>) : 
+          (<Alert severity="error" onClose={()=>{setErrMsg("")}}>{errMsg}</Alert>)
+          }
         </Collapse>
       </Grid>
       {/* Title */}
