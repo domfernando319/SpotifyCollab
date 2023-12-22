@@ -137,8 +137,8 @@ class UpdateRoom(APIView):
             if room.host != user_id:
                 return Response({'Message': "You are not the host!"}, status=status.HTTP_404_NOT_FOUND)
             room.guest_can_pause = guest_can_pause
-            room.votes_to_skip = votes_skip
-            room.save(update_fields=['guest_can_pause', 'vites_to_skip'])
+            room.votes_to_skip = votes_to_skip
+            room.save(update_fields=['guest_can_pause', 'votes_to_skip'])
             return Response(RoomSerializer(room).data, status=status.HTTP_200_OK)
         return Response({'Bad Request': "Invalid Data..."}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -30,10 +30,8 @@ function Room(props) {
             setGuestCanPause(data.guest_can_pause)
             setIsHost(data.is_host)
         })
-        // .catch((error) => {
-        //     console.error('Error fetching room details:', error)
-        // })
   }
+  
 
   function leaveButtonClick() {
     const requestOptions = {
@@ -71,15 +69,17 @@ function Room(props) {
           votesToSkip={votesToSkip} 
           guestCanPause={guestCanPause} 
           code={roomCode} 
-          updateCallback={() => {
-
-          }}/>
+          updateCallback = {getRoomDetails}
+          />
       </Grid>
       <Grid item xs={12} align="center">
         <Button
         variant="contained"
         color = "secondary"
-        onClick={() => setSettingsEnabled(false)}>
+        onClick={() => {
+          setSettingsEnabled(false)
+          getRoomDetails()
+          }}>
           Close Settings
         </Button>
       </Grid>
