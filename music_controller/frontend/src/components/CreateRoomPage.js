@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -10,13 +10,22 @@ import { Link } from "react-router-dom";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import { Collapse } from '@material-ui/core';
+import { Alert } from "@mui/material";
 
 function CreateRoomPage(props) {
-  const defaultVotes = 2;
-  const [guestCanPause, setGuestCanPause] = useState(true);
-  const [votesToSkip, setVotesToSkip] = useState(defaultVotes);
-  const navigate = useNavigate();
 
+  const [guestCanPause, setGuestCanPause] = useState(props.guestCanPause);
+  const [votesToSkip, setVotesToSkip] = useState(props.votesToSkip);
+  const [updateFlag, setUpdateFlag] = useState(props.update);
+  const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
+  
+  const [errMsg, setErrMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const { roomCode } = useParams();
+  const navigate = useNavigate();
+  const pageTitle = props.update ? "Update Room Settings" : "Create a Room";
 
   const handleVotesChanged = (e) => {
     setVotesToSkip(e.target.value);
@@ -25,6 +34,21 @@ function CreateRoomPage(props) {
   const handleGuestCanPauseChanged = (e) => {
     setGuestCanPause(e.target.value === 'true' ? true : false);
   };
+  
+  function authenticateSpotify() {
+    fetch('/spotify/is-authenticated').then((response) => {
+      return response.json()
+    }).then((data) => {
+      setSpotifyAuthenticated(data.auth_status)
+      if (!spotifyAuthenticated) {
+        fetch('/spotify/get-auth-url').then((res) => {
+          return res.json()
+        }).then((data) => {
+          window.location.replace(data.url) //this will redirect us to spotify authentication page. then redirect back to frontend
+        })
+      }
+    })
+  }
 
   const handleRoomButtonPressed = () => {
     const requestOptions = {
@@ -37,16 +61,82 @@ function CreateRoomPage(props) {
     };
     fetch('/api/create-room', requestOptions)
       .then((response) => response.json())
-      .then((data) => navigate('/room/' + data.code))
+      .then((data) => {
+        navigate('/room/' + data.code) 
+        authenticateSpotify()
+      })
       .catch((err) => console.error('Error creating room:', err));
   };
 
+  function handleUpdateButtonPressed() {
+    const requestOptions = {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        votes_to_skip: votesToSkip,
+        guest_can_pause: guestCanPause,
+        code: roomCode
+      }),
+    };
+    fetch('/api/update-room', requestOptions)
+      .then((response) => {
+        if (response.ok) {
+            setSuccessMsg("Room updated successfully!")            
+            // // navigate to the new updated room endpoint
+            // navigate('/room/' + roomCode)
+        } else {
+            setErrMsg("Error updating room...")
+        }
+        return response.json()
+      })
+      .then((data) => {
+        setGuestCanPause(data.guest_can_pause)
+        setVotesToSkip(data.votes_to_skip)
+
+      })
+  }
+
+  function renderCreateButtons() {
+    return (
+      <Grid container spacing={1}>
+        <Grid item xs={12} align="center">
+          <Button color="primary" variant="contained" onClick={handleRoomButtonPressed}>
+            Create a Room
+          </Button>
+        </Grid>
+        <Grid item xs={12} align="center">
+          <Button color="secondary" variant="contained" to="/" component={Link}>
+            Back
+          </Button>
+        </Grid>
+      </Grid>  
+    )
+  }
+
+  function renderUpdateButtons() {
+    return (
+      <Grid item xs={12} align="center">
+          <Button color="primary" variant="contained" onClick={handleUpdateButtonPressed}>
+            Update
+          </Button>
+        </Grid>
+    )
+  }
+
   return (
     <Grid container spacing={1}>
+      <Grid item xs={12} align="center">
+        <Collapse in={errMsg != "" || successMsg != ""}>
+          {successMsg != "" ? 
+          (<Alert severity="success" onClose={()=>{setSuccessMsg("")}}>{successMsg}</Alert>) : 
+          (<Alert severity="error" onClose={()=>{setErrMsg("")}}>{errMsg}</Alert>)
+          }
+        </Collapse>
+      </Grid>
       {/* Title */}
       <Grid item xs={12} align="center">
         <Typography component='h4' variant='h4'>
-          Create a room
+          {pageTitle}
         </Typography>
       </Grid>
       {/* radio buttons */}
@@ -59,7 +149,7 @@ function CreateRoomPage(props) {
             </div>
           </FormHelperText>
 
-          <RadioGroup row defaultValue="true" onChange={handleGuestCanPauseChanged}>
+          <RadioGroup row defaultValue={guestCanPause.toString()} onChange={handleGuestCanPauseChanged}>
             <FormControlLabel 
               value ="true" 
               control={<Radio color="primary"/>}
@@ -83,7 +173,7 @@ function CreateRoomPage(props) {
             required={true} 
             type="number"
             onChange={handleVotesChanged}
-            defaultValue={defaultVotes}
+            defaultValue={votesToSkip}
             inputProps={{
               min: 1,
               style: {textAlign: "center"}
@@ -96,18 +186,17 @@ function CreateRoomPage(props) {
           </FormHelperText>
         </FormControl>
       </Grid>
-      <Grid item xs={12} align="center">
-        <Button color="primary" variant="contained" onClick={handleRoomButtonPressed}>
-          Create a Room
-        </Button>
-      </Grid>
-      <Grid item xs={12} align="center">
-        <Button color="secondary" variant="contained" to="/" component={Link}>
-          Back
-        </Button>
-      </Grid>
+      {updateFlag ? renderUpdateButtons() : renderCreateButtons()}
     </Grid>
   );
+}
+
+CreateRoomPage.defaultProps = {
+  votesToSkip : 2,
+  guestCanPause : true,
+  update : false,
+  roomCode: null,
+  updateCallBack: () =>{}
 }
 
 export default CreateRoomPage;
