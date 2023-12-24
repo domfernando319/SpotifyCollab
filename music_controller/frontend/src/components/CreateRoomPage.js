@@ -18,6 +18,7 @@ function CreateRoomPage(props) {
   const [guestCanPause, setGuestCanPause] = useState(props.guestCanPause);
   const [votesToSkip, setVotesToSkip] = useState(props.votesToSkip);
   const [updateFlag, setUpdateFlag] = useState(props.update);
+  const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
   
   const [errMsg, setErrMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -33,6 +34,21 @@ function CreateRoomPage(props) {
   const handleGuestCanPauseChanged = (e) => {
     setGuestCanPause(e.target.value === 'true' ? true : false);
   };
+  
+  function authenticateSpotify() {
+    fetch('/spotify/is-authenticated').then((response) => {
+      return response.json()
+    }).then((data) => {
+      setSpotifyAuthenticated(data.auth_status)
+      if (!spotifyAuthenticated) {
+        fetch('/spotify/get-auth-url').then((res) => {
+          return res.json()
+        }).then((data) => {
+          window.location.replace(data.url) //this will redirect us to spotify authentication page. then redirect back to frontend
+        })
+      }
+    })
+  }
 
   const handleRoomButtonPressed = () => {
     const requestOptions = {
@@ -45,7 +61,10 @@ function CreateRoomPage(props) {
     };
     fetch('/api/create-room', requestOptions)
       .then((response) => response.json())
-      .then((data) => navigate('/room/' + data.code))
+      .then((data) => {
+        navigate('/room/' + data.code) 
+        authenticateSpotify()
+      })
       .catch((err) => console.error('Error creating room:', err));
   };
 

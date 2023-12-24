@@ -20,7 +20,8 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('', include('frontend.urls'))
+    path('', include('frontend.urls')),
+    path('spotify/', include('spotify.urls'))
 ]
 # if I have 'domain.com/hello" after the slash will be sent to this file which dispatches endpoints
 
