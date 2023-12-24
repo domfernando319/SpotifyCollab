@@ -8,6 +8,7 @@ function Room(props) {
   const [guestCanPause, setGuestCanPause] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [settingsEnabled, setSettingsEnabled] = useState(false);
+  const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
 
   const navigate = useNavigate();
   const { roomCode } = useParams();
@@ -32,6 +33,21 @@ function Room(props) {
         })
   }
   
+  function authenticateSpotify() {
+    fetch('/spotify/is-authenticated').then((response) => {
+      return response.json()
+    }).then((data) => {
+      setSpotifyAuthenticated(data.auth_status)
+      if (!spotifyAuthenticated) {
+        fetch('/spotify/get-auth-url').then((res) => {
+          return res.json()
+        }).then((data) => {
+          window.location.replace(data.url) //this will redirect us to spotify authentication page. then redirect back to frontend
+        })
+      }
+    })
+  }
+
 
   function leaveButtonClick() {
     const requestOptions = {
