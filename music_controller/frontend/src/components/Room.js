@@ -9,6 +9,8 @@ function Room(props) {
   const [isHost, setIsHost] = useState(false);
   const [settingsEnabled, setSettingsEnabled] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
+  const [song, setSong] = useState({})
+  
 
   const navigate = useNavigate();
   const { roomCode } = useParams();
@@ -112,7 +114,9 @@ function Room(props) {
             Code: {roomCode}
           </Typography>
         </Grid>
-        <Grid item xs={12} align='center'>
+
+
+        {/* <Grid item xs={12} align='center'>
           <Typography variant="h6" component="h6">
             Votes to Skip: {votesToSkip}
           </Typography>
@@ -126,7 +130,7 @@ function Room(props) {
           <Typography variant="h6" component="h6">
             Host: {isHost ? 'Yes' : 'No'}
           </Typography>
-        </Grid>
+        </Grid> */}
 
         {/* settings button  */}
         {isHost ? renderSettingsButton() : null }
