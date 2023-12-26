@@ -63,13 +63,17 @@ class IsAuthenticated(APIView):
 
 class CurrentSong(APIView):
     def get(self, request, format=None):
-        room_code = self.request.session.get('room_code')
+        room_code = request.session.get('room_code')
         room = Room.objects.filter(code=room_code)
         if room.exists():
             room = room[0]
         else:
-            return Response({}, status.HTTP_404_NOT_FOUND)
+            return Response({}, status=status.HTTP_404_NOT_FOUND)
         host = room.host
+
+        #  # Check if Spotify authentication is valid or refresh the token if needed
+        # if not is_spotify_authenticated(self.request.session.session_key):
+        #     refresh_spotify_token(self.request.session.session_key)
 
         #now we can get token info from host and send the request 
         endpoint = "player/currently-playing"
@@ -79,6 +83,10 @@ class CurrentSong(APIView):
         if 'error' in response or 'item' not in response:
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         
+       
+
+
+
         item = response.get('item')
         duration = item.get('duration_ms')
         progress = response.get('progress_ms')
@@ -88,7 +96,7 @@ class CurrentSong(APIView):
 
         artist_string = ""
         
-        for i, artist in enumerate(item.get('artist')):
+        for i, artist in enumerate(item.get('artists')):
             if i > 0:
                 artist_string += ", "
             name = artist.get('name')

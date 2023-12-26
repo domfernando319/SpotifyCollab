@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {Grid, Button, Typography} from '@material-ui/core';
 import CreateRoomPage from './CreateRoomPage';
+import MusicPlayer from './MusicPlayer';
 
 function Room(props) {
   const [votesToSkip, setVotesToSkip] = useState(2);
@@ -10,7 +11,7 @@ function Room(props) {
   const [settingsEnabled, setSettingsEnabled] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
   const [song, setSong] = useState({})
-  
+  let [interval, setIntervalState] = useState(null)
 
   const navigate = useNavigate();
   const { roomCode } = useParams();
@@ -18,6 +19,17 @@ function Room(props) {
   useEffect(() => {
     getRoomDetails() //call getRoom Details when roomCode changes
   }, [roomCode]);
+
+  useEffect(() => {
+    // when component mounts set interval and call every second
+    interval = setInterval(getCurrentSong, 1000)
+
+    // cleanup function : clear the interval when the component unmounts
+    return () => {
+      clearInterval(interval)
+    }
+  }, [])
+
   // You can define functions within components like so
   function getRoomDetails() {
     fetch('/api/get-room' + '?code=' + roomCode)
@@ -47,6 +59,21 @@ function Room(props) {
           window.location.replace(data.url) //this will redirect us to spotify authentication page. then redirect back to frontend
         })
       }
+    }).then(() => {
+      getCurrentSong()
+    })
+  }
+
+  function getCurrentSong() {
+    fetch('/spotify/current-song').then((res) => {
+      if (!res.ok) {
+        return {};
+      } else {
+        return res.json()
+      }
+    }).then((data) => {
+      setSong(data)
+      console.log("song data", data)
     })
   }
 
@@ -131,7 +158,7 @@ function Room(props) {
             Host: {isHost ? 'Yes' : 'No'}
           </Typography>
         </Grid> */}
-
+        <MusicPlayer {...song}/>
         {/* settings button  */}
         {isHost ? renderSettingsButton() : null }
 
