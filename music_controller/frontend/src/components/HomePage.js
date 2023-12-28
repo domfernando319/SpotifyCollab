@@ -32,6 +32,15 @@ export default function HomePage(props) {
           <Typography variant="h3" compact="h3">
             SpotifyCollab
           </Typography>
+          <Typography variant="body1">
+            1. Create a listening room. Host must have Spotify Premium!
+          </Typography>
+          <Typography variant="body1">
+            2. Share the Room Code
+          </Typography>
+          <Typography variant="body1">
+            Happy Listening!
+          </Typography>
         </Grid>
         <Grid item xs={12} align="center">
           <ButtonGroup disableElevation variant="contained" color="primary">
